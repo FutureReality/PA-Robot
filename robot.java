@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.*;
 
 public class Gui10 extends JFrame {
     JButton adelante;
@@ -63,7 +64,7 @@ public class Gui10 extends JFrame {
             X++;
 		    direccion = "norte";
             System.out.println("Direccion: " + direccion);
-            System.out.println("Y: " + Y);
+            System.out.println("X: " + X);
             actualizarEstado();
         }
     }
@@ -73,7 +74,7 @@ public class Gui10 extends JFrame {
             X--;
             direccion = "sur";
             System.out.println("Direccion: " + direccion);
-            System.out.println("Y: " + Y);
+            System.out.println("X: " + X);
             actualizarEstado();
         }
     }
@@ -83,7 +84,7 @@ public class Gui10 extends JFrame {
             Y++;
             direccion = "oeste";
             System.out.println("Direccion: " + direccion);
-            System.out.println("X: " + X);
+            System.out.println("Y: " + Y);
             actualizarEstado();
         }
     }
@@ -93,22 +94,53 @@ public class Gui10 extends JFrame {
             Y--;
             direccion = "este";
             System.out.println("Direccion: " + direccion);
-            System.out.println("X: " + X);
+            System.out.println("Y: " + Y);
             actualizarEstado();
         }
     }
 
     class guardarestado implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            System.out.println("Estado guardado: X=" + X + ", Y=" + Y + ", Direccion=" + direccion);
-			actualizarEstado();
+            try {
+                FileWriter writer = new FileWriter("estado.txt");
+                BufferedWriter bufferedWriter = new BufferedWriter(writer);
+                bufferedWriter.write("X=" + X + "\n");
+                bufferedWriter.write("Y=" + Y + "\n");
+                bufferedWriter.write("Direccion=" + direccion + "\n");
+                bufferedWriter.close();
+                System.out.println("Estado guardado en estado.txt");
+            } catch (IOException ex) {
+                System.err.println("Error al guardar el estado: " + ex.getMessage());
+            }
         }
     }
     
     class cargarestado implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            System.out.println("Estado cargado: X=" + X + ", Y=" + Y + ", Direccion=" + direccion);
-            actualizarEstado();
+            try {
+                BufferedReader reader = new BufferedReader(new FileReader("estado.txt"));
+                String linea;
+                while ((linea = reader.readLine()) != null) {
+                    // Parsear la línea para obtener los valores
+                    String[] partes = linea.split("=");
+                    if (partes.length == 2) {
+                        String clave = partes[0];
+                        String valor = partes[1];
+                        if (clave.equals("X")) {
+                            X = Integer.parseInt(valor);
+                        } else if (clave.equals("Y")) {
+                            Y = Integer.parseInt(valor);
+                        } else if (clave.equals("Direccion")) {
+                            direccion = valor;
+                        }
+                    }
+                }
+                reader.close();
+                actualizarEstado();
+                System.out.println("Estado cargado desde estado_robot.txt");
+            } catch (IOException ex) {
+                System.err.println("Error al cargar el estado: " + ex.getMessage());
+            }
         }
     }
 }
